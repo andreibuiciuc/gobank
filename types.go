@@ -1,6 +1,9 @@
 package main
 
-import "math/rand"
+import (
+	"math/rand"
+	"net/http"
+)
 
 type Account struct {
 	ID        int    `json:"id"`
@@ -17,4 +20,20 @@ func NewAccount(firstName, lastname string) *Account {
 		LastName:  lastname,
 		Number:    int64(rand.Intn(1000000)),
 	}
+}
+
+type APIServer struct {
+	listenAddr string
+}
+
+func NewAPIServer(listenAddress string) *APIServer {
+	return &APIServer{
+		listenAddr: listenAddress,
+	}
+}
+
+type APIFunc func(http.ResponseWriter, *http.Request) error
+
+type APIError struct {
+	Error string
 }

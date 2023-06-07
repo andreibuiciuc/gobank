@@ -9,37 +9,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type APIServer struct {
-	listenAddr string
-}
-
-type APIFunc func(http.ResponseWriter, *http.Request) error
-
-type APIError struct {
-	Error string
-}
-
-// Creates a new API server with the given listener address
-func NewAPIServer(listenAddress string) *APIServer {
-	return &APIServer{
-		listenAddr: listenAddress,
-	}
-}
-
-func makeHTTPHandlerFunc(f APIFunc) http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		if err := f(writer, request); err != nil {
-			writeJSON(writer, http.StatusBadRequest, APIError{Error: err.Error()})
-		}
-	}
-}
-
-func writeJSON(writer http.ResponseWriter, status int, v any) error {
-	writer.WriteHeader(status)
-	writer.Header().Set("Content-Type", "application/json")
-	return json.NewEncoder(writer).Encode(v)
-}
-
 func (server *APIServer) Run() {
 	router := mux.NewRouter()
 
@@ -80,4 +49,19 @@ func (server *APIServer) handleCreateAccount(writer http.ResponseWriter, request
 // Handles the HTTP DELETE request for deleting an existing account
 func (server *APIServer) handleDeleteAccount(writer http.ResponseWriter, request *http.Request) error {
 	return nil
+}
+
+// Converts a function to a HTTP handler function
+func makeHTTPHandlerFunc(f APIFunc) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		if err := f(writer, request); err != nil {
+			writeJSON(writer, http.StatusBadRequest, APIError{Error: err.Error()})
+		}
+	}
+}
+
+func writeJSON(writer http.ResponseWriter, status int, v any) error {
+	writer.Header().Add("Content-Type", "application/json")
+	writer.WriteHeader(status)
+	return json.NewEncoder(writer).Encode(v)
 }
