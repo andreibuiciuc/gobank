@@ -44,6 +44,7 @@ func (server *APIServer) Run() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/account", makeHTTPHandlerFunc(server.handleAccount))
+	router.HandleFunc("/account/{id}", makeHTTPHandlerFunc(server.handleGetAccount))
 
 	log.Println("Server listening on port: ", server.listenAddr)
 
@@ -66,7 +67,9 @@ func (server *APIServer) handleAccount(writer http.ResponseWriter, request *http
 
 // Handles the HTTP GET request for retrieving an account
 func (server *APIServer) handleGetAccount(writer http.ResponseWriter, request *http.Request) error {
-	return nil
+	account := NewAccount("Andrei", "Buiciuc")
+
+	return writeJSON(writer, http.StatusOK, account)
 }
 
 // Handles the HTTP POST request for creating a new account
