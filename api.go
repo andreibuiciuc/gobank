@@ -34,8 +34,19 @@ func (server *APIServer) handleAccount(writer http.ResponseWriter, request *http
 	return fmt.Errorf("Method provided not allowed: %s", request.Method)
 }
 
-// Handles the HTTP GET request for retrieving an account
+// Handles the HTTP GET request for retrieving accounts
 func (server *APIServer) handleGetAccount(writer http.ResponseWriter, request *http.Request) error {
+	accounts, err := server.store.GetAccounts()
+
+	if err != nil {
+		return err
+	}
+
+	return writeJSON(writer, http.StatusOK, accounts)
+}
+
+// Handles the HTTP GET request for retrieving an account by its ID
+func (server *APIServer) handleGetAccountByID(writer http.ResponseWriter, request *http.Request) error {
 	account := NewAccount("Andrei", "Buiciuc")
 
 	return writeJSON(writer, http.StatusOK, account)
@@ -43,7 +54,20 @@ func (server *APIServer) handleGetAccount(writer http.ResponseWriter, request *h
 
 // Handles the HTTP POST request for creating a new account
 func (server *APIServer) handleCreateAccount(writer http.ResponseWriter, request *http.Request) error {
-	return nil
+	accountRequest := new(CreateAccountRequest)
+
+	if err := json.NewDecoder(request.Body).Decode(accountRequest); err != nil {
+		return err
+	}
+
+	account := NewAccount(accountRequest.FirstName, accountRequest.LastName)
+	_, err := server.store.CreateAccount(account)
+
+	if err != nil {
+		return err
+	}
+
+	return writeJSON(writer, http.StatusOK, account)
 }
 
 // Handles the HTTP DELETE request for deleting an existing account
