@@ -7,16 +7,16 @@ import (
 func main() {
 
 	store, err := NewPostgresStore()
-	isAccDropEnable := false
+	isAccDropEnabled := false
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := store.Init(isAccDropEnable); err != nil {
+	if err := store.Init(isAccDropEnabled); err != nil {
 		log.Fatal(err)
 	}
 
-	server := NewAPIServer(":3000", store)
+	server := NewAPIServer(":3001", store)
 	server.Run()
 }

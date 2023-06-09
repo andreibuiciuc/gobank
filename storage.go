@@ -34,10 +34,10 @@ func NewPostgresStore() (*PostgresStore, error) {
 	return &PostgresStore{db: db}, nil
 }
 
-func (store *PostgresStore) Init(isAccDropEnable bool) error {
+func (store *PostgresStore) Init(isAccDropEnabled bool) error {
 	var err error = nil
 
-	if isAccDropEnable {
+	if isAccDropEnabled {
 		err = store.dropAccountTable()
 	}
 
@@ -101,7 +101,6 @@ func (store *PostgresStore) UpdateAccount(account *Account) (*Account, error) {
 
 func (store *PostgresStore) GetAccounts() ([]*Account, error) {
 	query := "select * from account"
-
 	rows, err := store.db.Query(query)
 
 	if err != nil {
@@ -111,14 +110,7 @@ func (store *PostgresStore) GetAccounts() ([]*Account, error) {
 	accounts := []*Account{}
 
 	for rows.Next() {
-		account := new(Account)
-		err := rows.Scan(
-			&account.ID,
-			&account.FirstName,
-			&account.LastName,
-			&account.Number,
-			&account.Balance,
-			&account.CreatedAt)
+		account, err := scanColumnsIntoAccount(rows)
 
 		if err != nil {
 			return nil, err
@@ -131,5 +123,37 @@ func (store *PostgresStore) GetAccounts() ([]*Account, error) {
 }
 
 func (store *PostgresStore) GetAccountByID(id int) (*Account, error) {
-	return nil, nil
+	query := "select * from account where id = $1"
+	rows, err := store.db.Query(query, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		account, err := scanColumnsIntoAccount(rows)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return account, nil
+	}
+
+	return nil, fmt.Errorf("account %d not found", id)
+}
+
+func scanColumnsIntoAccount(rows *sql.Rows) (*Account, error) {
+	var account *Account = new(Account)
+
+	err := rows.Scan(
+		&account.ID,
+		&account.FirstName,
+		&account.LastName,
+		&account.Number,
+		&account.Balance,
+		&account.CreatedAt,
+	)
+
+	return account, err
 }

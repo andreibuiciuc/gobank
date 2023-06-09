@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// Entities and constructor functions
+
 type Account struct {
 	ID        int       `json:"id"`
 	FirstName string    `json:"firstName"`
@@ -15,6 +17,8 @@ type Account struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
+// Constructor function: function that returns a pointer to an instantiated component
+// In this case, the function constructor will return a pointer to a new instance of the Account component
 func NewAccount(firstName, lastname string) *Account {
 	return &Account{
 		FirstName: firstName,
@@ -29,6 +33,8 @@ type APIServer struct {
 	store      Storage
 }
 
+// Constructor function: function that returns a pointer to an instantiated component
+// In this case, the function constructor will return a pointer to a new instance of the APIServer component
 func NewAPIServer(listenAddress string, store Storage) *APIServer {
 	return &APIServer{
 		listenAddr: listenAddress,

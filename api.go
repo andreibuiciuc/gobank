@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -13,7 +14,7 @@ func (server *APIServer) Run() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/account", makeHTTPHandlerFunc(server.handleAccount))
-	router.HandleFunc("/account/{id}", makeHTTPHandlerFunc(server.handleGetAccount))
+	router.HandleFunc("/account/{id}", makeHTTPHandlerFunc(server.handleGetAccountByID))
 
 	log.Println("Server listening on port: ", server.listenAddr)
 
@@ -47,7 +48,19 @@ func (server *APIServer) handleGetAccount(writer http.ResponseWriter, request *h
 
 // Handles the HTTP GET request for retrieving an account by its ID
 func (server *APIServer) handleGetAccountByID(writer http.ResponseWriter, request *http.Request) error {
-	account := NewAccount("Andrei", "Buiciuc")
+	idString := mux.Vars(request)["id"]
+
+	id, err := strconv.Atoi(idString)
+
+	if err != nil {
+		return fmt.Errorf("invalid account ID %s", idString)
+	}
+
+	account, err := server.store.GetAccountByID(id)
+
+	if err != nil {
+		return err
+	}
 
 	return writeJSON(writer, http.StatusOK, account)
 }
@@ -84,6 +97,8 @@ func makeHTTPHandlerFunc(f APIFunc) http.HandlerFunc {
 	}
 }
 
+// Constructs a HTTP response
+// Check the interface of the Response Writer for further information
 func writeJSON(writer http.ResponseWriter, status int, v any) error {
 	writer.Header().Add("Content-Type", "application/json")
 	writer.WriteHeader(status)
