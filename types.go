@@ -45,7 +45,7 @@ func NewAPIServer(listenAddress string, store Storage) *APIServer {
 type APIFunc func(http.ResponseWriter, *http.Request) error
 
 type APIError struct {
-	Error string
+	Error string `json:"error"`
 }
 
 type CreateAccountRequest struct {
